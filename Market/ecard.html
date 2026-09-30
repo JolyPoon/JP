@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A09">
+<title>iBitPay 电子名片</title>
+<meta name="description" content="iBitPay · 安全、快速、低费率的 USDT 支付网关">
+<link rel="icon" href="logo/svg/ibitpay-icon-ink.svg">
+<link rel="apple-touch-icon" href="logo/png/ibitpay-icon-ink.png">
+<style>
+  @font-face { font-family: "IBP Sans"; src: url(assets/fonts/Geist-latin.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "IBP Mono"; src: url(assets/fonts/GeistMono-latin.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "IBP Sans SC"; src: url(assets/fonts/NotoSansSC-subset.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+
+  :root {
+    --bg: #0A0A09;
+    --ink: #141413;
+    --text: #F5F3EC;
+    --text-2: rgba(245, 243, 236, .66);
+    --text-3: rgba(245, 243, 236, .42);
+    --line: rgba(245, 243, 236, .09);
+    --panel: rgba(245, 243, 236, .035);
+    --clay: #D97757;
+    --clay-hi: #F0A07C;
+    --clay-deep: #C6613F;
+    --radius: 22px;
+    --sans: "IBP Sans", "IBP Sans SC", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+    --mono: "IBP Mono", "IBP Sans SC", ui-monospace, "SFMono-Regular", monospace;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+  body {
+    margin: 0; min-height: 100vh; min-height: 100dvh;
+    background: var(--bg); color: var(--text);
+    font-family: var(--sans); -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; }
+
+  /* ---------------------------------------------------------- 背景 */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    background:
+      radial-gradient(520px 380px at 50% -120px, rgba(217, 119, 87, .34), transparent 70%),
+      radial-gradient(420px 420px at 105% 55%, rgba(217, 119, 87, .09), transparent 70%),
+      radial-gradient(380px 380px at -10% 90%, rgba(240, 160, 124, .06), transparent 70%),
+      var(--bg);
+  }
+  .bg::before { content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(245, 243, 236, .045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245, 243, 236, .045) 1px, transparent 1px);
+    background-size: 28px 28px; background-position: center -1px;
+    -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 25%, transparent 85%);
+            mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 25%, transparent 85%);
+  }
+  .bg::after { /* 缓慢扫过的光束 */
+    content: ""; position: absolute; top: -20%; bottom: -20%; width: 40%; left: -60%;
+    background: linear-gradient(90deg, transparent, rgba(240, 160, 124, .06), transparent);
+    transform: skewX(-18deg); animation: beam 9s ease-in-out 1.2s infinite;
+  }
+  @keyframes beam { 0% { left: -60% } 60%, 100% { left: 130% } }
+
+  /* ---------------------------------------------------------- 布局 */
+  .card { position: relative; z-index: 1; width: 100%; max-width: 440px; margin: 0 auto;
+    padding: max(18px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom)); }
+  .panel { position: relative; background: linear-gradient(180deg, rgba(245, 243, 236, .05), rgba(245, 243, 236, .02));
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+  .stack > * + * { margin-top: 12px; }
+  .reveal { opacity: 0; transform: translateY(10px); animation: reveal .7s cubic-bezier(.2, .7, .2, 1) forwards; animation-delay: calc(var(--d, 0) * 90ms + 80ms); }
+  @keyframes reveal { to { opacity: 1; transform: none; } }
+
+  .label { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--text-3); }
+  .label b { color: var(--clay); font-weight: 500; }
+  .label::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
+
+  /* ---------------------------------------------------------- 顶栏 */
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 14px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
+  .brand svg { width: 26px; height: 26px; display: block; border-radius: 7px; box-shadow: 0 0 0 1px rgba(245, 243, 236, .14); }
+  .pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px;
+    font: 500 10.5px/1 var(--mono); letter-spacing: .14em; color: var(--text-2); background: rgba(245, 243, 236, .03); }
+  .pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--clay); box-shadow: 0 0 0 0 rgba(217, 119, 87, .6); animation: ping 2.2s ease-out infinite; }
+  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(217, 119, 87, .55) } 70%, 100% { box-shadow: 0 0 0 7px rgba(217, 119, 87, 0) } }
+
+  /* ---------------------------------------------------------- 身份卡 */
+  .hero { padding: 22px 20px 18px; overflow: hidden; }
+  .hero::before { /* 渐变描边 */
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: linear-gradient(145deg, rgba(217, 119, 87, .75), rgba(217, 119, 87, 0) 38%, rgba(245, 243, 236, .06) 70%, rgba(217, 119, 87, .4));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
+  }
+  .hero-top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .avatar { position: relative; width: 78px; height: 78px; border-radius: 23px; overflow: hidden; flex: none;
+    box-shadow: 0 10px 40px -8px rgba(217, 119, 87, .45); isolation: isolate; }
+  .avatar::before { content: ""; position: absolute; inset: -40%; z-index: -1;
+    background: conic-gradient(from 0deg, rgba(217, 119, 87, 0) 0 55%, rgba(217, 119, 87, .95) 80%, rgba(240, 160, 124, 1) 86%, rgba(217, 119, 87, 0) 100%);
+    animation: spin 3.6s linear infinite; }
+  .avatar::after { content: ""; position: absolute; inset: 1.5px; z-index: -1; border-radius: 21.5px; background: rgba(245, 243, 236, .14); }
+  .avatar svg { position: absolute; inset: 2px; width: calc(100% - 4px); height: calc(100% - 4px); display: block; }
+  .avatar .spark { transform-box: fill-box; transform-origin: center; animation: spark 3.6s ease-in-out infinite; filter: drop-shadow(0 0 2px rgba(240, 160, 124, .9)); }
+  @keyframes spin { to { transform: rotate(1turn) } }
+  @keyframes spark { 0%, 100% { transform: rotate(0) scale(1) } 50% { transform: rotate(45deg) scale(1.12) } }
+
+  .meta { text-align: right; font: 500 10.5px/1.7 var(--mono); letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
+  .meta span { color: var(--clay); }
+
+  .who { margin-top: 20px; }
+  .name { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 0; }
+  .name-cn { font: 600 34px/1.1 var(--sans); letter-spacing: .04em; }
+  .name-en { font: 500 15px/1.2 var(--sans); color: var(--text-2); letter-spacing: .01em; }
+  .role { margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: var(--text-2); }
+  .role b { font-weight: 500; color: var(--text); }
+  .role i { display: inline-block; width: 4px; height: 4px; margin: 0 8px 3px; border-radius: 50%; background: var(--clay); font-style: normal; }
+
+  .chart { display: block; width: calc(100% + 40px); margin: 14px -20px 2px; height: auto; }
+  .chart .c { opacity: 0; transform-box: fill-box; transform-origin: bottom; animation: candle .5s ease-out forwards; animation-delay: calc(var(--i) * 55ms + 450ms); }
+  @keyframes candle { from { opacity: 0; transform: scaleY(.2) } to { opacity: 1; transform: none } }
+  .chart .band, .chart .fc, .chart .spk, .chart .tag { opacity: 0; animation: fade .8s ease-out 1.25s forwards; }
+  .chart .fc { stroke-dasharray: 4 3.5; animation: fade .8s ease-out 1.25s forwards, dash 1.4s linear infinite; }
+  .chart .spk { transform-box: fill-box; transform-origin: center; animation: fade .6s ease-out 1.4s forwards, pulse 2.4s ease-in-out 2s infinite; }
+  @keyframes fade { to { opacity: 1 } }
+  @keyframes dash { to { stroke-dashoffset: -15 } }
+  @keyframes pulse { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.18) } }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .chips li { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(245, 243, 236, .03);
+    font: 500 11px/1 var(--mono); letter-spacing: .06em; color: var(--text-2); }
+  .chips li:first-child { border-color: rgba(217, 119, 87, .45); color: var(--clay-hi); background: rgba(217, 119, 87, .08); }
+
+  /* ---------------------------------------------------------- 按钮 */
+  .actions { display: grid; grid-template-columns: 1fr 56px; gap: 10px; }
+  .cta { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; height: 56px; border: 0; border-radius: 16px; cursor: pointer;
+    background: linear-gradient(135deg, #EC9774, var(--clay) 45%, var(--clay-deep)); color: var(--ink);
+    font-size: 16px; font-weight: 600; letter-spacing: .02em;
+    box-shadow: 0 12px 34px -12px rgba(217, 119, 87, .8), inset 0 1px 0 rgba(255, 255, 255, .35); }
+  .cta::after { content: ""; position: absolute; top: 0; bottom: 0; width: 45%; left: -60%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent); transform: skewX(-20deg);
+    animation: shine 4.5s ease-in-out 1.8s infinite; }
+  @keyframes shine { 0% { left: -60% } 35%, 100% { left: 130% } }
+  .cta svg, .icon-btn svg { width: 20px; height: 20px; }
+  .icon-btn { display: grid; place-items: center; height: 56px; border-radius: 16px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; color: var(--text); }
+  .cta:active, .icon-btn:active { transform: scale(.98); }
+
+  /* ---------------------------------------------------------- 联系方式 */
+  .rows { display: grid; gap: 8px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 10px; border-radius: 16px; border: 1px solid transparent; background: rgba(245, 243, 236, .025); transition: border-color .2s, background .2s; }
+  .row:hover { border-color: var(--line); background: rgba(245, 243, 236, .045); }
+  .row .go { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .ico { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: rgba(217, 119, 87, .1); color: var(--clay-hi); border: 1px solid rgba(217, 119, 87, .2); }
+  .ico svg { width: 19px; height: 19px; }
+  .kv { min-width: 0; }
+  .k { display: block; font: 500 10px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--text-3); }
+  .v { display: block; margin-top: 6px; font: 500 15px/1.2 var(--mono); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .copy { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 10px; border: 0; background: transparent; color: var(--text-3); cursor: pointer; }
+  .copy:hover { color: var(--text); background: rgba(245, 243, 236, .06); }
+  .copy svg { width: 17px; height: 17px; }
+
+  /* ---------------------------------------------------------- 关于 */
+  .lead { margin: 0 0 16px; font-size: 15px; line-height: 1.65; color: var(--text-2); }
+  .lead b { color: var(--text); font-weight: 500; }
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .feat { padding: 14px; border-radius: 16px; background: rgba(245, 243, 236, .03); border: 1px solid var(--line); }
+  .feat .k { color: var(--clay); }
+  .feat h3 { margin: 8px 0 6px; font-size: 15px; font-weight: 600; }
+  .feat p { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--text-2); }
+  .ticker { position: relative; overflow: hidden; margin: 12px -20px -20px; padding: 13px 0; border-top: 1px solid var(--line);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .ticker-track { display: flex; width: max-content; animation: marquee 22s linear infinite; }
+  .ticker span { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; font: 500 12px/1 var(--mono); letter-spacing: .12em; color: var(--text-2); }
+  .ticker span::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--clay); }
+  .ticker span.fiat::before { background: transparent; border: 1px solid var(--text-3); }
+  @keyframes marquee { to { transform: translateX(-50%) } }
+
+  /* ---------------------------------------------------------- 扫码 */
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin-bottom: 16px; border-radius: 12px; background: rgba(245, 243, 236, .04); border: 1px solid var(--line); }
+  .tabs button { height: 36px; border: 0; border-radius: 9px; background: transparent; color: var(--text-2); font-size: 13.5px; font-weight: 500; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: rgba(245, 243, 236, .1); color: var(--text); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
+  .qr-box { position: relative; width: min(236px, 72vw); margin: 0 auto; padding: 16px; border-radius: 18px; background: #F5F3EC; }
+  .qr-box svg.qr { display: block; width: 100%; height: auto; }
+  .qr-box .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--clay); }
+  .qr-box .tl { top: -8px; left: -8px; border-right: 0; border-bottom: 0; border-top-left-radius: 8px; }
+  .qr-box .tr { top: -8px; right: -8px; border-left: 0; border-bottom: 0; border-top-right-radius: 8px; }
+  .qr-box .bl { bottom: -8px; left: -8px; border-right: 0; border-top: 0; border-bottom-left-radius: 8px; }
+  .qr-box .br { bottom: -8px; right: -8px; border-left: 0; border-top: 0; border-bottom-right-radius: 8px; }
+  .qr-box .scan { position: absolute; left: 10px; right: 10px; top: 8%; height: 2px; border-radius: 2px; opacity: 0;
+    background: linear-gradient(90deg, transparent, var(--clay), transparent); box-shadow: 0 0 14px 2px rgba(217, 119, 87, .55);
+    animation: scan 2.4s ease-in-out 1.5s 2; }
+  @keyframes scan { 0% { top: 6%; opacity: 0 } 12%, 88% { opacity: .75 } 100% { top: 94%; opacity: 0 } }
+  .hint { margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--text-2); }
+  .hint span { font-family: var(--mono); color: var(--text); }
+
+  /* ---------------------------------------------------------- 底部 */
+  .foot { display: flex; align-items: center; justify-content: space-between; padding: 18px 4px 0; font: 500 11px/1 var(--mono); letter-spacing: .1em; color: var(--text-3); }
+  .foot a { color: var(--text-2); }
+
+  .toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); z-index: 10; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+    padding: 10px 16px; border-radius: 999px; background: rgba(30, 30, 28, .92); border: 1px solid var(--line); font-size: 13.5px;
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: opacity .25s, transform .25s; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (min-width: 700px) { .card { padding-top: 48px; padding-bottom: 56px; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal, .chart .c, .chart .band, .chart .fc, .chart .spk, .chart .tag { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+
+<main class="card stack">
+  <header class="bar reveal" style="--d:0">
+    <div class="brand"><svg viewBox="0 0 64 64" data-icon aria-hidden="true"></svg>iBitPay</div>
+    <span class="pill"><i></i>E-CARD</span>
+  </header>
+
+  <!-- 身份 -->
+  <section class="panel hero reveal" style="--d:1" aria-label="名片">
+    <div class="hero-top">
+      <div class="avatar"><svg viewBox="0 0 64 64" data-icon="spark" aria-hidden="true"></svg></div>
+      <div class="meta">USDT<br>Payment<br><span>Gateway</span></div>
+    </div>
+    <div class="who">
+      <h1 class="name"><span class="name-cn" data-bind="nameCn"></span><span class="name-en" data-bind="nameEn"></span></h1>
+      <p class="role"><b data-bind="titleCn"></b><i></i><span data-bind="titleEn"></span></p>
+    </div>
+    <svg class="chart" id="chart" viewBox="0 0 360 118" aria-hidden="true"></svg>
+    <ul class="chips"><li>USDT 支付网关</li><li>OTC 承兑</li><li>API 对接</li></ul>
+  </section>
+
+  <div class="actions reveal" style="--d:2">
+    <button class="cta" id="save" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+      保存到通讯录
+    </button>
+    <button class="icon-btn" id="share" type="button" aria-label="分享名片">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
+    </button>
+  </div>
+
+  <!-- 联系方式 -->
+  <section class="panel reveal" style="--d:3">
+    <h2 class="label"><b>01</b>Contact · 联系方式</h2>
+    <div class="rows" id="rows"></div>
+  </section>
+
+  <!-- 关于 -->
+  <section class="panel reveal" style="--d:4">
+    <h2 class="label"><b>02</b>About · 关于 iBitPay</h2>
+    <p class="lead"><b>安全、快速、低费率</b>的 USDT 支付网关，专注外汇行业出入金解决方案，支持多国法币代收代付。</p>
+    <div class="features">
+      <div class="feat"><span class="k">Merchant</span><h3>商户收款</h3><p>一站式 USDT 收款，标准 API 对接，即时结算到账。</p></div>
+      <div class="feat"><span class="k">OTC</span><h3>承兑商系统</h3><p>多通道收款，灵活结算，专属风控体系。</p></div>
+    </div>
+    <div class="ticker" aria-label="支持币种：BTC、ETH、USDT、CNY、THB、VND、USD、HKD">
+      <div class="ticker-track" id="ticker" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- 扫码 -->
+  <section class="panel reveal" style="--d:5">
+    <h2 class="label"><b>03</b>Scan · 扫一扫</h2>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" aria-selected="true" data-qr="vcard">名片 · 存联系人</button>
+      <button type="button" role="tab" aria-selected="false" data-qr="web">官网</button>
+    </div>
+    <div class="qr-box">
+      <svg class="qr" id="qr" role="img" aria-label="二维码"></svg>
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <span class="scan"></span>
+    </div>
+    <p class="hint" id="qr-hint"></p>
+  </section>
+
+  <footer class="foot reveal" style="--d:6">
+    <a data-bind-href="website" data-bind="websiteHost"></a>
+    <span>© iBitPay</span>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/qrcode.js"></script>
+<script>
+  // ================================================================
+  //  名片信息：只需要改这里（中文改动后运行 scripts/fetch_cjk_subset.py）
+  //  以下姓名 / 电话 / 邮箱 / Telegram 均为示例占位
+  // ================================================================
+  const CARD = {
+    nameCn:   "林知远",
+    nameEn:   "Lin Zhiyuan",
+    titleCn:  "商务合作总监",
+    titleEn:  "Head of Business Development",
+    org:      "iBitPay",
+    phone:    "+86 000 0000 0000",
+    email:    "name@ibitpay.io",
+    telegram: "yourname",            // 不带 @
+    website:  "https://www.ibitpay.io",
+  };
+
+  // ------------------------------------------------------------ 图标
+  const SPARK = "M33.5 16.5L33.5 8.7A1.5 1.5 0 0 0 30.5 8.7L30.5 16.5A1.5 1.5 0 0 0 33.5 16.5ZM33.061 17.561L36.879 13.742A1.5 1.5 0 0 0 34.758 11.621L30.939 15.439A1.5 1.5 0 0 0 33.061 17.561ZM32 18L39.8 18A1.5 1.5 0 0 0 39.8 15L32 15A1.5 1.5 0 0 0 32 18ZM30.939 17.561L34.758 21.379A1.5 1.5 0 0 0 36.879 19.258L33.061 15.439A1.5 1.5 0 0 0 30.939 17.561ZM30.5 16.5L30.5 24.3A1.5 1.5 0 0 0 33.5 24.3L33.5 16.5A1.5 1.5 0 0 0 30.5 16.5ZM30.939 15.439L27.121 19.258A1.5 1.5 0 0 0 29.242 21.379L33.061 17.561A1.5 1.5 0 0 0 30.939 15.439ZM32 15L24.2 15A1.5 1.5 0 0 0 24.2 18L32 18A1.5 1.5 0 0 0 32 15ZM33.061 15.439L29.242 11.621A1.5 1.5 0 0 0 27.121 13.742L30.939 17.561A1.5 1.5 0 0 0 33.061 15.439Z";
+  const CANDLE = "M30.7 31L30.7 54.5A1.3 1.3 0 0 0 33.3 54.5L33.3 31A1.3 1.3 0 0 0 30.7 31ZM28.35 35A2.6 2.6 0 0 0 25.75 37.6V47.4A2.6 2.6 0 0 0 28.35 50H35.65A2.6 2.6 0 0 0 38.25 47.4V37.6A2.6 2.6 0 0 0 35.65 35Z";
+  const TILE = "M15 0H49A15 15 0 0 1 64 15V49A15 15 0 0 1 49 64H15A15 15 0 0 1 0 49V15A15 15 0 0 1 15 0Z";
+  document.querySelectorAll("[data-icon]").forEach(svg => {
+    svg.innerHTML = `<path d="${TILE}" fill="#141413"/><path class="spark" d="${SPARK}" fill="#D97757"/><path d="${CANDLE}" fill="#F5F3EC"/>`;
+  });
+
+  const I = {
+    phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+    mail: '<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M3 7l9 6 9-6"/>',
+    send: '<path d="M21.5 3.5 2.8 10.7c-.8.3-.8 1.4 0 1.7l4.7 1.7 1.8 5.6c.2.7 1.1.9 1.6.4l2.7-2.6 4.8 3.5c.6.4 1.4.1 1.6-.6l3.2-15.2c.2-.8-.6-1.4-1.2-1.2z"/><path d="m7.5 14.1 9.8-6.6-6.9 8.7"/>',
+    globe: '<circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c2.5 2.6 3.8 5.8 3.8 9.5s-1.3 6.9-3.8 9.5c-2.5-2.6-3.8-5.8-3.8-9.5S9.5 5.1 12 2.5z"/>',
+    copy: '<rect x="8.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M15.5 8.5V6a2.5 2.5 0 0 0-2.5-2.5H6A2.5 2.5 0 0 0 3.5 6v7A2.5 2.5 0 0 0 6 15.5h2.5"/>',
+  };
+  const svgIcon = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ------------------------------------------------------------ 填充信息
+  const host = CARD.website.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const data = { ...CARD, websiteHost: host };
+  document.querySelectorAll("[data-bind]").forEach(el => { el.textContent = data[el.dataset.bind]; });
+  document.querySelectorAll("[data-bind-href]").forEach(el => { el.href = data[el.dataset.bindHref]; });
+  document.title = `${CARD.nameCn} · ${CARD.org} 电子名片`;
+
+  const rows = [
+    { k: "Phone · 电话",       v: CARD.phone,              href: `tel:${CARD.phone.replace(/[^\d+]/g, "")}`, icon: I.phone },
+    { k: "Email · 邮箱",       v: CARD.email,              href: `mailto:${CARD.email}`,                       icon: I.mail },
+    { k: "Telegram",           v: `@${CARD.telegram}`,     href: `https://t.me/${CARD.telegram}`,              icon: I.send },
+    { k: "Website · 官网",     v: host,                    href: CARD.website,                                 icon: I.globe },
+  ];
+  document.getElementById("rows").innerHTML = rows.map(r => `
+    <div class="row">
+      <a class="go" href="${esc(r.href)}"${r.href.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>
+        <span class="ico">${svgIcon(r.icon)}</span>
+        <span class="kv"><span class="k">${esc(r.k)}</span><span class="v">${esc(r.v)}</span></span>
+      </a>
+      <button class="copy" type="button" data-copy="${esc(r.v)}" aria-label="复制 ${esc(r.k)}">${svgIcon(I.copy)}</button>
+    </div>`).join("");
+
+  const coins = ["BTC", "ETH", "USDT"], fiat = ["CNY", "THB", "VND", "USD", "HKD"];
+  const once = coins.map(c => `<span>${c}</span>`).join("") + fiat.map(c => `<span class="fiat">${c}</span>`).join("");
+  document.getElementById("ticker").innerHTML = once + once + once + once;
+
+  // ------------------------------------------------------------ K 线 + AI 预测
+  (function chart() {
+    const svg = document.getElementById("chart");
+    const closes = [.10, .19, .14, .27, .22, .34, .30, .42, .38, .50, .57, .52, .64];
+    const x0 = 22, dx = 17.5, w = 8, y = p => 104 - p * 86;
+    let h = "";
+    [26, 52, 78, 104].forEach(gy => { h += `<path d="M0 ${gy}H360" stroke="rgba(245,243,236,.07)" stroke-dasharray="2 4"/>`; });
+    let open = .05;
+    closes.forEach((c, i) => {
+      const x = x0 + i * dx, up = c >= open;
+      const hi = Math.max(open, c) + .04 + (i % 3) * .012, lo = Math.min(open, c) - .035 - (i % 2) * .015;
+      const top = y(Math.max(open, c)), bh = Math.max(2.5, Math.abs(y(open) - y(c)));
+      h += `<g class="c" style="--i:${i}">
+        <path d="M${x} ${y(hi)}V${y(lo)}" stroke="rgba(245,243,236,${up ? .7 : .35})" stroke-width="1.2"/>
+        ${up ? `<rect x="${x - w / 2}" y="${top}" width="${w}" height="${bh}" rx="1.6" fill="rgba(245,243,236,.9)"/>`
+             : `<rect x="${x - w / 2 + .6}" y="${top + .6}" width="${w - 1.2}" height="${bh - 1.2}" rx="1.4" fill="none" stroke="rgba(245,243,236,.4)" stroke-width="1.2"/>`}
+      </g>`;
+      open = c;
+    });
+    const nx = x0 + (closes.length - 1) * dx, ny = y(closes.at(-1));
+    const fx = t => nx + t * (372 - nx), fy = t => ny + (8 - ny) * (t * (2 - t) * .55 + t * .45);
+    let up = "", dn = "", line = "";
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24, X = fx(t).toFixed(1), Y = fy(t), s = t * 26;
+      up += `${i ? "L" : "M"}${X} ${(Y - s).toFixed(1)}`;
+      dn = `L${X} ${(Y + s * .8).toFixed(1)}` + dn;
+      line += `${i ? "L" : "M"}${X} ${Y.toFixed(1)}`;
+    }
+    h += `<defs><linearGradient id="band" x1="0" x2="1"><stop offset="0" stop-color="#D97757" stop-opacity=".38"/><stop offset="1" stop-color="#D97757" stop-opacity=".04"/></linearGradient></defs>`;
+    h += `<path class="band" d="${up}${dn}Z" fill="url(#band)"/>`;
+    h += `<path class="fc" d="${line}" fill="none" stroke="#E48A67" stroke-width="1.6" stroke-linecap="round"/>`;
+    h += `<path d="M${nx + 8} 6V112" stroke="rgba(245,243,236,.16)" stroke-dasharray="2 3"/>`;
+    h += `<circle cx="${nx}" cy="${ny}" r="3.2" fill="#0A0A09" stroke="#D97757" stroke-width="1.6"/>`;
+    const sx = fx(.3), sy = fy(.3);
+    let rays = "";
+    for (let i = 0; i < 8; i++) {
+      const a = (i * 45 - 90) * Math.PI / 180, r = i % 2 ? 5 : 7.6;
+      rays += `M${sx} ${sy}L${(sx + r * Math.cos(a)).toFixed(1)} ${(sy + r * Math.sin(a)).toFixed(1)}`;
+    }
+    h += `<g class="spk"><circle cx="${sx}" cy="${sy}" r="13" fill="#D97757" fill-opacity=".16"/><path d="${rays}" stroke="#F0A07C" stroke-width="2.2" stroke-linecap="round"/></g>`;
+    h += `<text class="tag" x="${sx - 16}" y="${sy - 12}" text-anchor="end" fill="#E48A67" font-family="IBP Mono, monospace" font-size="9.5" letter-spacing="1.4">AI · T+1</text>`;
+    svg.innerHTML = h;
+  })();
+
+  // ------------------------------------------------------------ vCard
+  const vEsc = s => String(s).replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\n/g, "\\n");
+  function vcard() {
+    return [
+      "BEGIN:VCARD", "VERSION:3.0",
+      `N:${vEsc(CARD.nameCn)};;;;`,
+      `FN:${vEsc(CARD.nameCn)}`,
+      `ORG:${vEsc(CARD.org)}`,
+      `TITLE:${vEsc(CARD.titleCn)} / ${vEsc(CARD.titleEn)}`,
+      `TEL;TYPE=CELL:${CARD.phone}`,
+      `EMAIL;TYPE=WORK:${CARD.email}`,
+      `URL:${CARD.website}`,
+      `X-SOCIALPROFILE;TYPE=telegram:https://t.me/${CARD.telegram}`,
+      "END:VCARD",
+    ].join("\r\n");
+  }
+
+  // ------------------------------------------------------------ 二维码
+  function drawQR(text) {
+    const qr = qrcode(0, "M");
+    qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+    qr.addData(text, "Byte");
+    qr.make();
+    const n = qr.getModuleCount();
+    let d = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+    const el = document.getElementById("qr");
+    el.setAttribute("viewBox", `0 0 ${n} ${n}`);
+    el.setAttribute("shape-rendering", "crispEdges");
+    el.innerHTML = `<path d="${d}" fill="#141413"/>`;
+  }
+  const QR = {
+    vcard: { text: vcard, hint: () => "对方用手机相机扫码，<span>直接保存联系人</span>" },
+    web:   { text: () => CARD.website, hint: () => `扫码访问 <span>${esc(host)}</span>` },
+  };
+  function showQR(kind) {
+    drawQR(QR[kind].text());
+    document.getElementById("qr-hint").innerHTML = QR[kind].hint();
+    document.querySelectorAll("[data-qr]").forEach(b => b.setAttribute("aria-selected", b.dataset.qr === kind));
+  }
+  document.querySelectorAll("[data-qr]").forEach(b => b.addEventListener("click", () => showQR(b.dataset.qr)));
+  showQR("vcard");
+
+  // ------------------------------------------------------------ 交互
+  const toastEl = document.getElementById("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+  }
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); }
+    catch (e) {
+      const t = document.createElement("textarea");
+      t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.appendChild(t); t.select();
+      try { document.execCommand("copy"); } catch (e2) {}
+      t.remove();
+    }
+    toast("已复制");
+  }
+  document.getElementById("rows").addEventListener("click", e => {
+    const b = e.target.closest("[data-copy]");
+    if (b) copy(b.dataset.copy);
+  });
+
+  document.getElementById("save").addEventListener("click", () => {
+    const blob = new Blob([vcard()], { type: "text/vcard;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${CARD.nameEn.replace(/\s+/g, "-").toLowerCase() || "contact"}-ibitpay.vcf`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast("已生成联系人文件");
+  });
+
+  document.getElementById("share").addEventListener("click", async () => {
+    const payload = { title: document.title, text: `${CARD.nameCn} · ${CARD.titleCn} · ${CARD.org}`, url: location.href };
+    if (navigator.share) { try { await navigator.share(payload); return; } catch (e) { if (e.name === "AbortError") return; } }
+    copy(location.href);
+  });
+</script>
+</body>
+</html>

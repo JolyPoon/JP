@@ -1,9 +1,8 @@
-"""Rebuild the Chinese font subsets from the characters used in business-card.html.
+"""Rebuild the Chinese font subset from the characters used in ecard.html.
 
-Noto Serif SC / Noto Sans SC are ~10 MB each, so the page ships subsets that
-only contain the characters it actually uses. Run this after changing any
-Chinese text (e.g. the name or title) so offline preview / export keeps the
-right typeface:
+Noto Sans SC is ~10 MB, so the page ships a subset that only contains the
+characters it actually uses. Run this after changing any Chinese text (e.g. the
+name or title) so the page keeps the right typeface:
 
     python3 Market/scripts/fetch_cjk_subset.py
 """
@@ -13,13 +12,12 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-HTML = ROOT / "business-card.html"
+HTML = ROOT / "ecard.html"
 FONTS = ROOT / "assets/fonts"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 
 FAMILIES = {
-    "NotoSerifSC-subset.woff2": "Noto+Serif+SC:wght@500",
-    "NotoSansSC-subset.woff2": "Noto+Sans+SC:wght@400;500",
+    "NotoSansSC-subset.woff2": "Noto+Sans+SC:wght@400;500;600",
 }
 
 

@@ -1,66 +1,105 @@
-# iBitPay 名片 · Market
+# iBitPay 电子名片 · Market
 
-为 [www.ibitpay.io](https://www.ibitpay.io) 设计的双面名片。风格参考 claude.com（象牙白底、陶土色点缀、衬线大标题、留白），再加上 K 线、AI 预测曲线、坐标网格和等宽数据字体，让它看起来更有金融和 AI 的感觉。
+为 [www.ibitpay.io](https://www.ibitpay.io) 设计的电子名片（手机 H5 页面）和一整套 Logo 矢量文件。
 
-![效果图](export/ibitpay-card-mockup.png)
+<p>
+  <img src="export/ibitpay-ecard-screen.png" width="300" alt="电子名片首屏">
+  <img src="logo/ibitpay-logo-overview.png" width="420" alt="Logo 总览">
+</p>
 
 ## 文件
 
 ```
 Market/
-├── business-card.html          # 名片源文件：浏览器打开即可预览、改字、打印 / 导出 PDF
+├── ecard.html                    # 电子名片：手机浏览器打开即可使用
 ├── export/
-│   ├── ibitpay-card-print.pdf  # 印刷文件：2 页（正 / 反），每页 96×60 mm，含 3 mm 出血
-│   ├── ibitpay-card-front.png  # 正面（品牌面），成品尺寸 300 dpi
-│   ├── ibitpay-card-back.png   # 背面（信息面），成品尺寸 300 dpi
-│   └── ibitpay-card-mockup.png # 双面效果图
+│   ├── ibitpay-ecard-screen.png  # 名片首屏截图（1170×2532，发微信 / 朋友圈）
+│   └── ibitpay-ecard-long.png    # 名片完整长图
 ├── logo/
-│   ├── ibitpay-logo.svg / .png            # 横版 Logo（浅色底用）
-│   ├── ibitpay-logo-reversed.svg / .png   # 横版 Logo（深色底用）
-│   ├── ibitpay-mark.svg                   # 图标（浅色底用）
-│   ├── ibitpay-mark-reversed.svg          # 图标（深色底用）
-│   └── ibitpay-mark-1024.png              # 图标 1024 px（头像 / App 图标）
-├── assets/fonts/               # 本地字体（离线预览和导出用）
-└── scripts/                    # 生成 Logo、导出文件的脚本
+│   ├── svg/  pdf/  eps/  png/    # 12 款 Logo × 4 种格式（见下表）
+│   └── ibitpay-logo-overview.png # Logo 总览图
+├── assets/                       # 字体（Geist / Geist Mono / Noto Sans SC 子集）和二维码库
+└── scripts/                      # 生成 Logo、导出图片、更新中文字体子集的脚本
 ```
 
-## 设计说明
+## 电子名片 `ecard.html`
 
-**Logo（重绘版）**：一个小写的「i」。竖笔是一根 K 线，代表交易和金融；i 上的点换成陶土色火花，代表 AI 和智能；整体也是 iBitPay 的首字母。字标用 Newsreader 衬线体，第一个 i 的点也是陶土色，和图标呼应。所有文字都已转成曲线，SVG 在没有安装字体的电脑上也能正常显示。
+深色科技风：网格背景 + 陶土色光晕，头像位是带旋转光环的 Logo 图标，下方是动态 K 线和 AI 预测曲线（AI · T+1）、币种滚动行情条（BTC / ETH / USDT / CNY / THB / VND / USD / HKD）。
 
-> 这个开发环境的网络策略拦截了 ibitpay.io，读不到官网原 Logo，所以 Logo 是按品牌名重新绘制的。要换回原 Logo，把原文件替换到 `logo/` 下的同名文件，再运行导出脚本即可。
+功能：
 
-**正面（品牌面，墨黑底）**：Logo、标语 *Payments that think ahead.*，以及官网介绍里的「安全 · 快速 · 低费率的 USDT 支付网关」。右侧是象牙色的历史 K 线，末端接着陶土色的 AI 预测虚线和置信区间（AI · T+1）。横轴刻度是 iBitPay 支持的法币：CNY / THB / VND / USD / HKD。
+- **保存到通讯录**：一键生成并下载 vCard（.vcf），手机上打开即可存为联系人
+- **一键拨号 / 发邮件 / 打开 Telegram / 打开官网**，每一项都可以一键复制
+- **扫一扫**：可切换两种二维码。「名片」码用手机相机扫描后直接保存联系人，「官网」码打开 www.ibitpay.io。两种码都已实测可以正确识别，包括中文
+- **分享**：手机上调用系统分享面板；不支持时自动复制链接
+- 适配刘海屏安全区；系统开启「减少动态效果」时自动关闭动画
 
-**背面（信息面，象牙白底）**：中英文姓名、职位、联系方式，以及指向 `https://www.ibitpay.io` 的二维码（已验证可以扫描），二维码外加了一圈 AI 识别风格的取景框。
+### 修改名片信息
 
-| 色彩 | HEX | 印刷参考（CMYK 近似，以打样为准） |
-|---|---|---|
-| Ink 墨黑 | `#141413` | 大面积底色建议用四色黑 C60 M40 Y40 K100 |
-| Ivory 象牙 | `#F5F3EC` | C3 M3 Y8 K0，或直接用象牙白纸不印底色 |
-| Clay 陶土 | `#D97757` | C10 M65 Y70 K0 |
-| Stone 石灰 | `#75736B` | C0 M2 Y8 K60 |
+> ⚠️ 姓名「林知远 / Lin Zhiyuan」、职位、电话、邮箱、Telegram 都是**示例占位**，使用前请替换。
 
-字体：Newsreader（衬线）、Geist（正文）、Geist Mono（数据）、Noto Serif SC / Noto Sans SC（中文），均为 SIL OFL 开源授权，可免费商用。
+打开 `ecard.html`，只需修改 `<script>` 开头的 `CARD` 配置：
 
-## 修改名片内容
+```js
+const CARD = {
+  nameCn:   "林知远",
+  nameEn:   "Lin Zhiyuan",
+  titleCn:  "商务合作总监",
+  titleEn:  "Head of Business Development",
+  org:      "iBitPay",
+  phone:    "+86 000 0000 0000",
+  email:    "name@ibitpay.io",
+  telegram: "yourname",            // 不带 @
+  website:  "https://www.ibitpay.io",
+};
+```
 
-> ⚠️ 姓名「林知远 / Lin Zhiyuan」、职位、电话、邮箱、Telegram 都是**示例占位**，印刷前请换成真实信息。
-
-**方法一（最简单）**：用 Chrome 打开 `business-card.html`，直接点卡片上的文字修改（会自动保存在本机浏览器里），然后点「打印 / 导出 PDF」。在打印对话框里选择「另存为 PDF」，边距选「无」，缩放 100%，并勾选「背景图形」。
-
-**方法二（改源文件并重新导出）**：在 `business-card.html` 里修改带 `data-key` 的元素，然后运行：
+页面上的文字、拨号链接、vCard 和二维码都会根据这份配置自动生成。改完后：
 
 ```bash
-python3 Market/scripts/fetch_cjk_subset.py   # 改了中文时运行：重新生成中文字体子集
+python3 Market/scripts/fetch_cjk_subset.py   # 改了中文时运行：更新中文字体子集
 npm i -D playwright                          # 首次使用
-node Market/scripts/export.cjs               # 重新生成 export/ 下的 PDF 和 PNG，以及 logo PNG
+node Market/scripts/export.cjs               # 重新生成 export/ 下的名片截图
 ```
 
-修改 Logo 图形：编辑 `scripts/build_logo.py` 后运行 `pip install fonttools uharfbuzz && python3 Market/scripts/build_logo.py`。
+### 发布
 
-## 印刷参数
+把整个 `Market/` 文件夹放到任意静态网站托管（GitHub Pages、Vercel、Netlify、OSS / COS 等），就能用 `https://你的域名/ecard.html` 分享。每位同事复制一份 `ecard.html`、改好 `CARD` 配置即可，例如 `ecard-lin.html`。
 
-- 成品尺寸 90 × 54 mm（国内标准名片），四边出血 3 mm，文件尺寸 96 × 60 mm
-- 文字和二维码都在距离裁切线 4 mm 以内的安全区里（页面上点「显示出血与安全区」可以查看）
-- 建议用 350g 以上的象牙白艺术纸或黑卡纸；Logo 和陶土色部分可以做烫金或烫铜工艺
+## Logo 矢量文件
+
+图形含义：一个小写的「i」。竖笔是一根 K 线，代表交易和金融；i 上的点是陶土色火花，代表 AI 和智能；整体也是 iBitPay 的首字母。
+
+所有文件都是**纯填充路径**：没有描边，文字也已转成曲线。在 Illustrator、Figma、Sketch、CorelDRAW 里打开效果一致，不需要安装字体，可以任意缩放。PDF 可以直接用 Illustrator 打开编辑（AI 格式本身基于 PDF）。
+
+| 文件名 | 用途 |
+|---|---|
+| `ibitpay-icon-ink` | 图标，深色方块底（App 图标、头像、浅色背景） |
+| `ibitpay-icon-ivory` | 图标，浅色方块底（深色背景） |
+| `ibitpay-glyph-color` | 纯图形，无底色：陶土火花 + 墨黑 K 线（浅色背景） |
+| `ibitpay-glyph-color-reversed` | 纯图形，无底色：陶土火花 + 象牙 K 线（深色背景） |
+| `ibitpay-glyph-black` / `-white` | 单色版（烫印、雕刻、单色印刷） |
+| `ibitpay-logo` / `-reversed` | 横版组合，无衬线字标（主推，科技感） |
+| `ibitpay-logo-stacked` / `-reversed` | 竖版组合（开屏页、海报、方形位） |
+| `ibitpay-logo-serif` / `-reversed` | 横版组合，衬线字标（备选，偏编辑 / 品牌感） |
+
+每款都有 `svg/`、`pdf/`、`eps/`、`png/` 四种格式。PNG 为透明底，图标 1024 px 高，组合 512 px 高。
+
+| 色彩 | HEX | CMYK（近似，以打样为准） |
+|---|---|---|
+| Ink 墨黑 | `#141413` | C60 M40 Y40 K100 |
+| Ivory 象牙 | `#F5F3EC` | C3 M3 Y8 K0 |
+| Clay 陶土 | `#D97757` | C10 M65 Y70 K0 |
+
+修改 Logo 图形：编辑 `scripts/build_logo.py`，然后运行：
+
+```bash
+pip install fonttools uharfbuzz cairosvg
+python3 Market/scripts/build_logo.py
+```
+
+> 注：开发环境的网络策略拦截了 ibitpay.io，读不到官网原 Logo，这套 Logo 是按品牌名重新绘制的。
+
+## 字体与授权
+
+Geist、Geist Mono、Newsreader（衬线字标）、Noto Sans SC，均为 SIL Open Font License，可免费商用。二维码库为 [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)（MIT）。
