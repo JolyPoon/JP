@@ -15,14 +15,15 @@ const PAGE = pathToFileURL(path.join(ROOT, "ecard.html")).href;
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, reducedMotion: "reduce" });
   await page.goto(PAGE);
   await page.evaluate(() => document.fonts.ready);
-  // 长图里让背景（网格 + 光晕）铺满整页，而不是只停留在第一屏
-  await page.addStyleTag({ content: "body{position:relative} .bg{position:absolute}" });
   await page.waitForTimeout(300);
 
-  // 1) 长图：完整名片
-  await page.screenshot({ path: path.join(OUT, "ibitpay-ecard-long.png"), fullPage: true });
-  // 2) 首屏：手机一屏
+  // 1) 首屏：手机一屏（含底部操作栏）
   await page.screenshot({ path: path.join(OUT, "ibitpay-ecard-screen.png") });
+
+  // 2) 长图：完整名片。长图里按钮无法点击，所以隐藏底部操作栏
+  await page.addStyleTag({ content: ".dock{display:none} .page{padding-bottom:28px}" });
+  await page.waitForTimeout(100);
+  await page.screenshot({ path: path.join(OUT, "ibitpay-ecard-long.png"), fullPage: true });
 
   await browser.close();
   console.log("exported to", OUT);

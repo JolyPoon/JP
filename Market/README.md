@@ -24,32 +24,39 @@ Market/
 
 ## 电子名片 `ecard.html`
 
-深色科技风：网格背景 + 陶土色光晕，头像位是带旋转光环的 Logo 图标，下方是动态 K 线和 AI 预测曲线（AI · T+1）、币种滚动行情条（BTC / ETH / USDT / CNY / THB / VND / USD / HKD）。
+极简浅色风格：象牙白底、顶部精确网格、超大字号姓名、等宽数据字体，陶土色只做点缀。
+
+页面内容整理自 ibitpay.io 官网：
+- **定位**：安全、快速、低费率的 USDT 支付网关，专注外汇行业出入金，支持多国法币代收代付
+- **支持币种**：BTC / ETH / USDT，法币 CNY / THB / VND / USD / HKD
+- **解决方案**：商户、承兑商系统、开发者 API
+- **支付流程**：发起收款 → 智能匹配承兑商 → 用户支付 → 即时到账
+- **开户咨询**：联系提交申请，团队协助开通
+
+> 开发环境的网络策略拦截了 ibitpay.io，以上内容取自搜索引擎收录的官网首页。中文措辞可能和官网原文略有出入，建议对照官网核对一遍。
 
 功能：
 
+- **底部操作栏**始终可见：保存到通讯录、跳到二维码、分享
 - **保存到通讯录**：一键生成并下载 vCard（.vcf），手机上打开即可存为联系人
-- **一键拨号 / 发邮件 / 打开 Telegram / 打开官网**，每一项都可以一键复制
-- **扫一扫**：可切换两种二维码。「名片」码用手机相机扫描后直接保存联系人，「官网」码打开 www.ibitpay.io。两种码都已实测可以正确识别，包括中文
+- **一键拨号 / 发邮件 / 打开官网**，每一项都可以一键复制
+- **扫一扫**：可切换两种二维码。「名片」码用手机相机扫描后直接保存联系人，「官网」码打开 www.ibitpay.io。两种码都已实测可以正确识别
 - **分享**：手机上调用系统分享面板；不支持时自动复制链接
 - 适配刘海屏安全区；系统开启「减少动态效果」时自动关闭动画
 
 ### 修改名片信息
 
-> ⚠️ 姓名「林知远 / Lin Zhiyuan」、职位、电话、邮箱、Telegram 都是**示例占位**，使用前请替换。
-
-打开 `ecard.html`，只需修改 `<script>` 开头的 `CARD` 配置：
+打开 `ecard.html`，只需修改 `<script>` 开头的 `CARD` 配置。留空（`""`）的项目不会显示，也不会写进联系人文件：
 
 ```js
 const CARD = {
-  nameCn:   "林知远",
-  nameEn:   "Lin Zhiyuan",
-  titleCn:  "商务合作总监",
-  titleEn:  "Head of Business Development",
+  name:     "Tom",
+  nameAlt:  "",                  // 可选：第二个名字（中文名 / 英文名）
+  title:    "",                  // 可选：职位，如 "商务总监 · Head of BD"
   org:      "iBitPay",
-  phone:    "+86 000 0000 0000",
-  email:    "name@ibitpay.io",
-  telegram: "yourname",            // 不带 @
+  phone:    "+60 323432432",
+  email:    "Tom@ibitpay.cs",
+  telegram: "",                  // 可选：Telegram 用户名，不带 @
   website:  "https://www.ibitpay.io",
 };
 ```
@@ -64,7 +71,7 @@ node Market/scripts/export.cjs               # 重新生成 export/ 下的名片
 
 ### 发布
 
-把整个 `Market/` 文件夹放到任意静态网站托管（GitHub Pages、Vercel、Netlify、OSS / COS 等），就能用 `https://你的域名/ecard.html` 分享。每位同事复制一份 `ecard.html`、改好 `CARD` 配置即可，例如 `ecard-lin.html`。
+把整个 `Market/` 文件夹放到任意静态网站托管（GitHub Pages、Vercel、Netlify、OSS / COS 等），就能用 `https://你的域名/ecard.html` 分享。每位同事复制一份 `ecard.html`、改好 `CARD` 配置即可，例如 `ecard-tom.html`。
 
 ## Logo 矢量文件
 
